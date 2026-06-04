@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BillClear – Understand Your Energy Bill</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:      #1a3a5c;
+      --navy-dark: #122840;
+      --green:     #3a8a5c;
+      --green-bg:  #eef7f1;
+      --white:     #ffffff;
+      --offwhite:  #f5f7fa;
+      --border:    #d0dce8;
+      --text:      #1e2d3d;
+      --muted:     #5a6e82;
+      --radius:    12px;
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: var(--offwhite);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-mark {
+      width: 42px; height: 42px;
+      background: var(--green);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .logo-text { font-size: 22px; font-weight: bold; letter-spacing: -0.3px; }
+    .logo-tag  { font-size: 13px; opacity: 0.75; margin-top: 2px; font-family: system-ui, sans-serif; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(160deg, var(--navy-dark) 0%, var(--navy) 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 56px 24px 48px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 44px);
+      line-height: 1.25;
+      max-width: 700px;
+      margin: 0 auto 18px;
+    }
+    .hero p {
+      font-size: clamp(17px, 2.5vw, 20px);
+      opacity: 0.85;
+      max-width: 520px;
+      margin: 0 auto;
+      font-family: system-ui, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    /* ── Main card ── */
+    main { max-width: 760px; margin: 0 auto; padding: 36px 20px 60px; }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    @media (max-width: 520px) {
+      .card { padding: 24px 18px; }
+    }
+
+    .section-label {
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      border: 2.5px dashed var(--border);
+      border-radius: var(--radius);
+      background: var(--offwhite);
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--green);
+      background: var(--green-bg);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 44px; margin-bottom: 14px; }
+    .upload-zone h2 {
+      font-size: 22px;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+    .upload-zone p {
+      font-size: 16px;
+      color: var(--muted);
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+    }
+    .upload-zone .file-types {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      font-family: system-ui, sans-serif;
+    }
+
+    #file-chosen {
+      margin-top: 14px;
+      font-family: system-ui, sans-serif;
+      font-size: 15px;
+      color: var(--green);
+      font-weight: 600;
+      min-height: 22px;
+    }
+
+    /* ── Divider ── */
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 30px 0;
+      color: var(--muted);
+      font-family: system-ui, sans-serif;
+      font-size: 15px;
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Textarea ── */
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      font-size: 17px;
+      font-family: system-ui, sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color 0.2s;
+      background: var(--white);
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--navy);
+    }
+    textarea::placeholder { color: #a0b0bf; }
+
+    /* ── Button ── */
+    .btn-primary {
+      display: block;
+      width: 100%;
+      margin-top: 28px;
+      padding: 20px 32px;
+      background: var(--green);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 20px;
+      font-family: system-ui, sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.2px;
+    }
+    .btn-primary:hover  { background: #2e7049; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled {
+      background: #9bbfab;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Loading ── */
+    #loading {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .spinner {
+      width: 52px; height: 52px;
+      border: 5px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin: 0 auto 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p {
+      font-size: 22px;
+      color: var(--navy);
+      font-family: system-ui, sans-serif;
+    }
+    #loading small {
+      display: block;
+      margin-top: 8px;
+      font-size: 15px;
+      color: var(--muted);
+      font-family: system-ui, sans-serif;
+    }
+
+    /* ── Results ── */
+    #result { display: none; }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+    .result-icon {
+      width: 48px; height: 48px;
+      background: var(--green-bg);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    .result-header h2 {
+      font-size: 24px;
+      color: var(--navy);
+    }
+    .result-header p {
+      font-size: 15px;
+      color: var(--muted);
+      font-family: system-ui, sans-serif;
+      margin-top: 2px;
+    }
+
+    .result-body {
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--text);
+    }
+    .result-body strong {
+      display: block;
+      font-size: 17px;
+      font-family: system-ui, sans-serif;
+      font-weight: 700;
+      color: var(--navy);
+      margin-top: 26px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-size: 13px;
+      border-left: 3px solid var(--green);
+      padding-left: 10px;
+    }
+    .result-body p {
+      margin-bottom: 10px;
+    }
+
+    .tip-box {
+      margin-top: 32px;
+      background: var(--green-bg);
+      border: 1.5px solid #b2d9c2;
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .tip-box .tip-icon { font-size: 26px; flex-shrink: 0; margin-top: 2px; }
+    .tip-box .tip-text {
+      font-family: system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.65;
+      color: #1e4a30;
+    }
+    .tip-box .tip-label {
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--green);
+      margin-bottom: 5px;
+    }
+
+    /* ── Try again ── */
+    .btn-secondary {
+      display: block;
+      width: 100%;
+      margin-top: 28px;
+      padding: 16px 32px;
+      background: transparent;
+      color: var(--navy);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 17px;
+      font-family: system-ui, sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { border-color: var(--navy); }
+
+    /* ── Error ── */
+    #error-box {
+      display: none;
+      background: #fff5f5;
+      border: 1.5px solid #f5bfbf;
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      color: #8b2020;
+      font-family: system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.6;
+      margin-top: 20px;
+    }
+    #error-box strong { display: block; margin-bottom: 6px; font-size: 18px; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 28px 20px;
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-mark">⚡</div>
+    <div>
+      <div class="logo-text">BillClear</div>
+      <div class="logo-tag">Plain English energy bill help</div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>Confused by your energy bill?<br>Let us explain it.</h1>
+    <p>Upload your bill or paste the text below — we'll translate it into plain, simple English in seconds.</p>
+  </div>
+
+  <main>
+    <div class="card" id="form-card">
+
+      <div class="section-label">Step 1 — Share your bill</div>
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*,.pdf" />
+        <div class="upload-icon">📄</div>
+        <h2>Upload your bill</h2>
+        <p>Drag and drop here, or click to choose a file</p>
+        <p class="file-types">Accepted: photos (JPG, PNG) or PDF files</p>
+      </div>
+      <div id="file-chosen"></div>
+
+      <div class="or-divider">or</div>
+
+      <!-- Paste text -->
+      <div class="section-label">Paste your bill text</div>
+      <textarea
+        id="bill-text"
+        placeholder="Copy and paste the text from your bill here — numbers, dates, charges, anything you can see…"
+      ></textarea>
+
+      <button class="btn-primary" id="submit-btn" onclick="submitBill()">
+        Explain my bill →
+      </button>
+
+      <div id="error-box">
+        <strong>Something went wrong</strong>
+        <span id="error-msg"></span>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="card" id="loading" style="display:none">
+      <div class="spinner"></div>
+      <p>Reading your bill…</p>
+      <small>This usually takes about 10–15 seconds</small>
+    </div>
+
+    <!-- Result -->
+    <div class="card" id="result" style="display:none">
+      <div class="result-header">
+        <div class="result-icon">✅</div>
+        <div>
+          <h2>Here's what your bill means</h2>
+          <p>Written in plain English, just for you</p>
+        </div>
+      </div>
+      <div class="result-body" id="result-body"></div>
+      <button class="btn-secondary" onclick="resetForm()">← Explain another bill</button>
+    </div>
+  </main>
+
+  <footer>
+    BillClear is a helper tool, not a financial or energy advisor.<br>
+    Always check with your supplier if you have concerns about your bill.
+  </footer>
+
+  <script>
+    // ── File input handling ──
+    const fileInput   = document.getElementById('file-input');
+    const fileChosen  = document.getElementById('file-chosen');
+    const uploadZone  = document.getElementById('upload-zone');
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) {
+        fileChosen.textContent = '✓ ' + fileInput.files[0].name;
+      } else {
+        fileChosen.textContent = '';
+      }
+    });
+
+    uploadZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const files = e.dataTransfer.files;
+      if (files.length) {
+        fileInput.files = files;
+        fileChosen.textContent = '✓ ' + files[0].name;
+      }
+    });
+
+    // ── Submit ──
+    async function submitBill() {
+      const text   = document.getElementById('bill-text').value.trim();
+      const file   = fileInput.files[0];
+      const errBox = document.getElementById('error-box');
+      const errMsg = document.getElementById('error-msg');
+
+      errBox.style.display = 'none';
+
+      if (!text && !file) {
+        errBox.style.display = 'block';
+        errMsg.textContent   = 'Please upload a bill or paste some text first.';
+        return;
+      }
+
+      showLoading();
+
+      try {
+        let responseText;
+
+        if (file) {
+          responseText = await submitFile(file);
+        } else {
+          responseText = await submitText(text);
+        }
+
+        showResult(responseText);
+      } catch (err) {
+        showForm();
+        errBox.style.display = 'block';
+        errMsg.textContent   = err.message || 'An unexpected error occurred. Please try again.';
+      }
+    }
+
+    async function submitText(text) {
+      const res = await fetch('/api/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'The server returned an error. Please try again.');
+      }
+      const data = await res.json();
+      return data.explanation;
+    }
+
+    async function submitFile(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/explain-file', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'The server returned an error. Please try again.');
+      }
+      const data = await res.json();
+      return data.explanation;
+    }
+
+    // ── Render result ──
+    function showResult(text) {
+      document.getElementById('form-card').style.display = 'none';
+      document.getElementById('loading').style.display   = 'none';
+
+      const body = document.getElementById('result-body');
+      body.innerHTML = renderExplanation(text);
+      document.getElementById('result').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderExplanation(text) {
+      // Split on double newline paragraphs
+      const paras = text.split(/\n{2,}/).map(p => p.trim()).filter(Boolean);
+      let html = '';
+      let tipContent = '';
+
+      paras.forEach(para => {
+        // Detect bold heading lines like **HEADING**
+        if (/^\*\*(.+?)\*\*/.test(para)) {
+          // Check for the tip section
+          const headingMatch = para.match(/^\*\*(.+?)\*\*\s*([\s\S]*)/);
+          if (headingMatch) {
+            const heading = headingMatch[1].trim();
+            const body    = headingMatch[2].trim();
+
+            if (/tip|advice|suggestion/i.test(heading)) {
+              tipContent = `
+                <div class="tip-box">
+                  <div class="tip-icon">💡</div>
+                  <div class="tip-text">
+                    <div class="tip-label">Our tip for you</div>
+                    ${escHtml(body)}
+                  </div>
+                </div>`;
+            } else {
+              html += `<strong>${escHtml(heading)}</strong>`;
+              if (body) html += `<p>${escHtml(body)}</p>`;
+            }
+          }
+        } else {
+          html += `<p>${escHtml(para)}</p>`;
+        }
+      });
+
+      return html + tipContent;
+    }
+
+    function escHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/\n/g, '<br>');
+    }
+
+    // ── UI state helpers ──
+    function showLoading() {
+      document.getElementById('form-card').style.display = 'none';
+      document.getElementById('result').style.display    = 'none';
+      document.getElementById('loading').style.display   = 'block';
+    }
+
+    function showForm() {
+      document.getElementById('loading').style.display   = 'none';
+      document.getElementById('result').style.display    = 'none';
+      document.getElementById('form-card').style.display = 'block';
+    }
+
+    function resetForm() {
+      document.getElementById('result').style.display    = 'none';
+      document.getElementById('form-card').style.display = 'block';
+      document.getElementById('bill-text').value         = '';
+      fileInput.value                                    = '';
+      fileChosen.textContent                             = '';
+      document.getElementById('error-box').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
